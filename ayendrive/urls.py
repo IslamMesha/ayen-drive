@@ -13,21 +13,24 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.conf import settings
-from django.views.static import serve
 from django.conf.urls.static import static
+from django.contrib import admin
 from django.urls import path, include, re_path
+from django.views.static import serve
+
+from drive.views import IndexView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('drive/', include('drive.urls')),
+    path('', IndexView.as_view(), name='index'),
 ]
 
 # /media/uploads/file_path.pdf to read the uploaded files.
 if settings.DEBUG:
     urlpatterns += [
-        re_path(r'^media/(?P<path>.*)$', serve, {
-            'document_root': settings.MEDIA_ROOT,
-        }),
-    ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+                       re_path(r'^media/(?P<path>.*)$', serve, {
+                           'document_root': settings.MEDIA_ROOT,
+                       }),
+                   ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

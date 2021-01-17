@@ -1,6 +1,12 @@
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+from django.shortcuts import render
+from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 from rest_framework import viewsets
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.generics import ListAPIView
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from rest_framework.response import Response
 
 from drive.models import Document
@@ -31,3 +37,23 @@ class HomePageView(ListView):
     template_name = 'home.html'
     context_object_name = 'docs'
     queryset = Document.objects.order_by('-uploaded')
+
+
+class IndexView(TemplateView):
+    template_name = "index.html"
+
+
+@api_view(('POST',))
+@renderer_classes((TemplateHTMLRenderer, JSONRenderer))
+def login_view(request, *args, **kwargs):
+    context = {}
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        context['object_list'] = Document.objects.filter(owner=user).order_by('-uploaded')
+    else:
+        user = User.objects.create_user(username=username, password=password)
+        login(request, user)
+    return render(request, template_name='home.html', context=context)
