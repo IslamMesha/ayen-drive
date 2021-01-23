@@ -1,6 +1,7 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 from rest_framework import viewsets
@@ -57,3 +58,9 @@ def login_view(request, *args, **kwargs):
         user = User.objects.create_user(username=username, password=password)
         login(request, user)
     return render(request, template_name='home.html', context=context)
+
+
+@login_required
+def logout_view(request, *args, **kwargs):
+    logout(request)
+    return redirect('index')
